@@ -300,7 +300,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
     );
     forAll(U, cellI)
     {
-        Info<<"loop starting !"<<endl；
+        Info<<"loop starting !"<<endl;
         Xcoor=mesh.C()[cellI].component(vector::X);
         Ycoor=mesh.C()[cellI].component(vector::Y);
         Zcoor=mesh.C()[cellI].component(vector::Z);
