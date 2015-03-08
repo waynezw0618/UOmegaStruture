@@ -298,14 +298,16 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                 mesh,
                 dimensionedScalar("zero",dimensionSet(0, 0, -2, 0, 0),SMALL)
     );
-Info<<"loop starting !"<<endl;
     forAll(U, cellI)
     {
+        Info<<"loop starting !"<<endl；
         Xcoor=mesh.C()[cellI].component(vector::X);
         Ycoor=mesh.C()[cellI].component(vector::Y);
-        Zcoor=mesh.C([cellI].component(vector::Z);
+        Zcoor=mesh.C()[cellI].component(vector::Z);
         if(Foam::mag(Xcoor-Xr)<yTol){
+            Info<<"in X loop" <<endl;
             if (Foam::mag(Zcoor-Zr)<yTol) {
+                Info<<"in Z loop" <<endl;
                 //poit 1
                 if (Foam::mag(Ycoor-Yr)<yTol) {
                     temp1=UPrime.component(vector::X)()[cellI];
