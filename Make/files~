@@ -1,3 +1,0 @@
-UOmegaStruture.C
-
-EXE = $(FOAM_APPBIN)/UOmegaStruture
