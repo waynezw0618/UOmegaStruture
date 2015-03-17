@@ -62,6 +62,7 @@ int getGlobalID(std::vector<int> localID)
     }
     else{
         cout << "out of range, when calculate GlobalID" << std::endl;
+        return -1;
     }
 }
 
@@ -135,8 +136,6 @@ int getsamRefGloablID(std::vector<int> samPtLocalID,  std::vector<int> orgPtLoca
 void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 {
     bool writeResults = !args.optionFound("noWrite");
-    
-    mytest();
     
     Info<<"reading the 6 basic data for analysis."<<endl;
     
@@ -250,18 +249,18 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
              << localID_refpts[2]<<"], and blk_ID=["<< localID_refpts[3]<<"]"
              << endl;
         
-        volVectorField RUW= new volVectorField(
-                                                    IOobject
-                                                    (
-                                                        "RUW"+name(ref_idx),
-                                                        runTime.timeName(),
-                                                        mesh,
-                                                        IOobject::NO_READ,
-                                                        IOobject::AUTO_WRITE
-                                                    ),
-                                                    mesh,
-                                                    dimensionedVector("zero", dimensionSet(0, 0, 0, 0, 0, 0, 0), vector::zero)
-                                               );
+        volVectorField RUW(
+                                IOobject
+                                (
+                                    "RUW"+name(ref_idx),
+                                    runTime.timeName(),
+                                    mesh,
+                                    IOobject::NO_READ,
+                                    IOobject::AUTO_WRITE
+                                ),
+                                mesh,
+                                dimensionedVector("zero", dimensionSet(0, 0, 0, 0, 0, 0, 0), vector::zero)
+                        );
 
 
         
