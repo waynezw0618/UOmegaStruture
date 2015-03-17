@@ -278,11 +278,9 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                         localID_samPt.assign(1,localID_pts[2]);
                         localID_samPt.assign(2,k);
                         localID_samPt.assign(3,localID_pts[4]);
-                        /*localID_samPt[0] = i;
-                        localID_samPt[1] = localID_pts[2];
-                        localID_samPt[2] = k;
-                        localID_samPt[3] = localID_pts[4];*/
+                    Info << "a"<< endl;
                         int gID_samPt    = getGlobalID(localID_samPt);
+                    Info << "b" << endl;
                         int gID_samRefPt = getsamRefGloablID(localID_samPt,localID_pts,localID_refpts);
                         RUW.component(vector::X)()[cellI] = RUW.component(vector::X)()[cellI]
                                                            + Uturb.component(vector::X)()[gID_samRefPt]*Wturb.component(vector::X)()[gID_samPt]/ \
