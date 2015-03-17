@@ -45,7 +45,7 @@ Description
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-int Foam::getGlobalID(std::vector<int> localID)
+int getGlobalID(std::vector<int> localID)
 {
     if (localID[3]==0) {
         return (Nx*Ny0)*localID[2]+Nx*localID[1]+localID[0];
@@ -60,12 +60,11 @@ int Foam::getGlobalID(std::vector<int> localID)
         return (Nx*Ny3)*localID[2]+Nx*localID[1]+localID[0]+Nx*(Ny0+Ny1+Ny2)*Nz;
     }
     else{
-            FatalError << "out of range, when calculate GlobalID" << nl
-            << exit(FatalError);
+        Cout << "out of range, when calculate GlobalID" << endl;
     }
 }
 
-std::vector<int> Foam::getLocalID(int ID)
+std::vector<int> getLocalID(int ID)
 {
     std::vector<int> localID;
 
@@ -99,7 +98,7 @@ std::vector<int> Foam::getLocalID(int ID)
         << exit(FatalError);
     }
     
-    return localID
+    return localID;
 }
 
 int getsamRefGloablID(std::vector<int> samPtLocalID,  std::vector<int> orgPtLocalID, std::vector<int> refLocalID)
@@ -124,7 +123,7 @@ int getsamRefGloablID(std::vector<int> samPtLocalID,  std::vector<int> orgPtLoca
     if ( (samRefLocalID[0]<0 || samRefLocalID[0]>Nx )
          || (samRefLocalID[2]<0 || samRefLocalID[2]>Nz)
         ) {
-        FatalError << "out of range, local point is not in the proper position" << nl
+        Info << "out of range, local point is not in the proper position" << nl
         << exit(FatalError);
     }
     
@@ -241,10 +240,10 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
     
     forAll(refpts,ref_idx)
     {
-        int gID_refpts = refmesh.findCell(refpts[ref_idx]);
+        int gID_refpts = mesh.findCell(refpts[ref_idx]);
         std::vector<int> localID_refpts=getLocalID(gID_refpts);
         Info << "Calculate R for the point (" <<refpts[ref_idx]<<"),and it is localted at"
-             << mesh.C()[gID_refpts] << nl;
+             << mesh.C()[gID_refpts] << nl
              << "it's global ID is " << gID_refpts << " and its local id is i=["
              << localID_refpts[0] <<"],j=["<< localID_refpts[1]<<"], and k=["
              << localID_refpts[2]<<"], and blk_ID=["<< localID_refpts[3]<<"]"
@@ -260,33 +259,37 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                                                         IOobject::AUTO_WRITE
                                                     ),
                                                     mesh,
-                                                    dimensionedVector("zero", dimensionSet(0, 0, 0, 0, 0, 0, 0),, vector::zero)
+                                                    dimensionedVector("zero", dimensionSet(0, 0, 0, 0, 0, 0, 0), vector::zero)
                                                );
 
 
         
-        forAll(mesh,cellI)
+        forAll(U,cellI)
         {
             std::vector<int> localID_pts=getLocalID(cellI);
             //loop over layer
             for (int i=0; i<Nx; i++) {
                 for (int k=0; k<Nz; k++) {
                         std::vector<int> localID_samPt[4];
-                        localID_samPt[0] = i;
+                        localID_samPt.assign(0,i);
+                        localID_samPt.assign(1,localID_pts[2]);
+                        localID_samPt.assign(2,k);
+                        localID_samPt.assign(3,localID_pts[4]);
+                        /*localID_samPt[0] = i;
                         localID_samPt[1] = localID_pts[2];
                         localID_samPt[2] = k;
-                        localID_samPt[3] = localID_pts[4];
+                        localID_samPt[3] = localID_pts[4];*/
                         int gID_samPt    = getGlobalID(localID_samPt);
                         int gID_samRefPt = getsamRefGloablID(localID_samPt,localID_pts,localID_refpts);
                         RUW.component(vector::X)()[cellI] = RUW.component(vector::X)()[cellI]
                                                            + Uturb.component(vector::X)()[gID_samRefPt]*Wturb.component(vector::X)()[gID_samPt]/ \
-                                                            (URMS.component(vector::X)()[gID_samRefPt]*WRMS.component(vector::X)()[gID_samPt]);
-                        RUW.component(vector::Y()[cellI] = RUW.component(vector::Y)()[cellI]
+                                                            (URMSMap.component(vector::X)()[gID_samRefPt]*vorticityRMSMap.component(vector::X)()[gID_samPt]);
+                        RUW.component(vector::Y)()[cellI] = RUW.component(vector::Y)()[cellI]
                                                            + Uturb.component(vector::X)()[gID_samRefPt]*Wturb.component(vector::Y)()[gID_samPt]/ \
-                                                             (URMS.component(vector::X)()[gID_samRefPt]*WRMS.component(vector::Y)()[gID_samPt]);
-                        RUW.component(vector::Z()[cellI] = RUW.component(vector::Z)()[cellI]
+                                                             (URMSMap.component(vector::X)()[gID_samRefPt]*vorticityRMSMap.component(vector::Y)()[gID_samPt]);
+                        RUW.component(vector::Z)()[cellI] = RUW.component(vector::Z)()[cellI]
                                                            + Uturb.component(vector::X)()[gID_samRefPt]*Wturb.component(vector::Z)()[gID_samPt]/ \
-                                                           (URMS.component(vector::X)()[gID_samRefPt]*WRMS.component(vector::Z)()[gID_samPt]);
+                                                           (URMSMap.component(vector::X)()[gID_samRefPt]*vorticityRMSMap.component(vector::Z)()[gID_samPt]);
                 }
             }
             RUW[cellI]=RUW[cellI]/(Nx*Nz);
