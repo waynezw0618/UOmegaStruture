@@ -45,10 +45,7 @@ Description
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-void Foam::mytest()
-{
-    Info<<"in my test" << endl;
-}
+
 int getGlobalID(std::vector<int> localID)
 {
     if (localID[3]==0) {
@@ -64,7 +61,7 @@ int getGlobalID(std::vector<int> localID)
         return (Nx*Ny3)*localID[2]+Nx*localID[1]+localID[0]+Nx*(Ny0+Ny1+Ny2)*Nz;
     }
     else{
-        cout << "out of range, when calculate GlobalID" << endl;
+        cout << "out of range, when calculate GlobalID" << std::endl;
     }
 }
 
@@ -98,7 +95,7 @@ std::vector<int> getLocalID(int ID)
         localID.push_back(3);
     }
     else{
-        cout << "out of range, when calculate LocalID" << endl;
+        cout << "out of range, when calculate LocalID" << std::endl;
     }
     
     return localID;
@@ -126,7 +123,7 @@ int getsamRefGloablID(std::vector<int> samPtLocalID,  std::vector<int> orgPtLoca
     if ( (samRefLocalID[0]<0 || samRefLocalID[0]>Nx )
          || (samRefLocalID[2]<0 || samRefLocalID[2]>Nz)
         ) {
-        cout << "out of range, local point is not in the proper position" << endl;
+        cout << "out of range, local point is not in the proper position" << std::endl;
     }
     
     samRefLocalID[1] = refLocalID[1];
@@ -274,7 +271,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
             //loop over layer
             for (int i=0; i<Nx; i++) {
                 for (int k=0; k<Nz; k++) {
-                        std::vector<int> localID_samPt[4];
+                        std::vector<int> localID_samPt(4,0);
                         localID_samPt.assign(0,i);
                         localID_samPt.assign(1,localID_pts[2]);
                         localID_samPt.assign(2,k);
