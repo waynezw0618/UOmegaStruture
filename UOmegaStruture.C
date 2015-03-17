@@ -165,7 +165,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
         mesh
     );
 
-    volVectorField URMSMap
+    volSymmTensorField URMSMap
     (
         IOobject
         (
@@ -204,7 +204,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
         mesh
     );
 
-    volVectorField vorticityRMSMap
+    volSymmTensorField vorticityRMSMap
     (
         IOobject
         (
@@ -283,13 +283,13 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                         int gID_samRefPt = getsamRefGloablID(localID_samPt,localID_pts,localID_refpts);
                         RUW.component(vector::X)()[cellI] = RUW.component(vector::X)()[cellI]
                                                            + Uturb.component(vector::X)()[gID_samRefPt]*Wturb.component(vector::X)()[gID_samPt]/ \
-                                                            (URMSMap.component(vector::X)()[gID_samRefPt]*vorticityRMSMap.component(vector::X)()[gID_samPt]);
+                                                            Foam::sqrt(URMSMap.component(tensor::XX)()[gID_samRefPt]*vorticityRMSMap.component(tensor::XX)()[gID_samPt]);
                         RUW.component(vector::Y)()[cellI] = RUW.component(vector::Y)()[cellI]
                                                            + Uturb.component(vector::X)()[gID_samRefPt]*Wturb.component(vector::Y)()[gID_samPt]/ \
-                                                             (URMSMap.component(vector::X)()[gID_samRefPt]*vorticityRMSMap.component(vector::Y)()[gID_samPt]);
-                        RUW.component(vector::Z)()[cellI] = RUW.component(vector::Z)()[cellI]
+                                                            Foam::sqrt(URMSMap.component(tensor::XX)()[gID_samRefPt]*vorticityRMSMap.component(tensor::YY)()[gID_samPt]);
+                        RUW.component(vector::Z)()[cellI] = RUW.component(tensor::XX)()[cellI]
                                                            + Uturb.component(vector::X)()[gID_samRefPt]*Wturb.component(vector::Z)()[gID_samPt]/ \
-                                                           (URMSMap.component(vector::X)()[gID_samRefPt]*vorticityRMSMap.component(vector::Z)()[gID_samPt]);
+                                                           Foam::sqrt(URMSMap.component(tensor::XX)()[gID_samRefPt]*vorticityRMSMap.component(tensor::ZZ)()[gID_samPt]);
                 }
             }
             RUW[cellI]=RUW[cellI]/(Nx*Nz);
