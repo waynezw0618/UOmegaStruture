@@ -34,14 +34,112 @@ Description
 
 #include "calc.H"
 #include "fvc.H"
+#include <vector>
+#define Nx 192
+#define Ny0 24
+#define Ny1 36
+#define Ny2 25
+#define Ny3 8
+#define Nz  160
+#define Nblocks 4
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+int Foam::getGlobalID(std::vector<int> localID)
+{
+    if (localID[3]==0) {
+        return (Nx*Ny0)*localID[2]+Nx*localID[1]+localID[0];
+    }
+    else if(localID[3]==1){
+        return (Nx*Ny1)*localID[2]+Nx*localID[1]+localID[0]+Nx*Ny0*Nz;
+    }
+    else if(localID[3]==2){
+        return (Nx*Ny2)*localID[2]+Nx*localID[1]+localID[0]+Nx*(Ny0+Ny1)*Nz;
+    }
+    else if(localID[3]==3){
+        return (Nx*Ny3)*localID[2]+Nx*localID[1]+localID[0]+Nx*(Ny0+Ny1+Ny2)*Nz;
+    }
+    else{
+            FatalError << "out of range, when calculate GlobalID" << nl
+            << exit(FatalError);
+    }
+}
+
+std::vector<int> Foam::getLocalID(int ID)
+{
+    std::vector<int> localID;
+
+    if(ID<Nx*Ny0*Nz){
+        localID.push_back((ID%(Nx*Ny0))%Nx);
+        localID.push_back((ID%(Nx*Ny0))/Nx);
+        localID.push_back( ID/(Nx*Ny0));
+        localID.push_back(0);
+    }
+    else if(ID>Nx*Ny0*Nz && ID<Nx*(Ny0+Ny1)*Nz ){
+        localID.push_back(((ID-Nx*Ny0*Nz)%(Nx*Ny1))%Nx);
+        localID.push_back(((ID-Nx*Ny0*Nz)%(Nx*Ny1))/Nx + Ny0);
+        localID.push_back( (ID-Nx*Ny0*Nz)/(Nx*Ny1));
+        localID.push_back(1);
+        
+    }
+    else if(ID>Nx*(Ny0+Ny1)*Nz && ID<Nx*(Ny0+Ny1+Ny2)*Nz){
+        localID.push_back(((ID-Nx*(Ny0+Ny1)*Nz)%(Nx*Ny2))%Nx);
+        localID.push_back(((ID-Nx*(Ny0+Ny1)*Nz)%(Nx*Ny2))/Nx + Ny0 + Ny1);
+        localID.push_back( (ID-Nx*(Ny0+Ny1)*Nz)/(Nx*Ny2));
+        localID.push_back(2);
+    }
+    else if(ID>Nx*(Ny0+Ny1+Ny2)*Nz && ID<Nx*(Ny0+Ny1+Ny2+Ny3)*Nz){
+        localID.push_back(((ID-Nx*(Ny0+Ny1+Ny2)*Nz)%(Nx*Ny3))%Nx);
+        localID.push_back(((ID-Nx*(Ny0+Ny1+Ny2)*Nz)%(Nx*Ny3))/Nx + Ny0 + Ny1 + Ny2);
+        localID.push_back( (ID-Nx*(Ny0+Ny1+Ny2)*Nz)/(Nx*Ny3));
+        localID.push_back(3);
+    }
+    else{
+        FatalError << "out of range, when calculate LocalID" << nl
+        << exit(FatalError);
+    }
+    
+    return localID
+}
+
+int getsamRefGloablID(std::vector<int> samPtLocalID,  std::vector<int> orgPtLocalID, std::vector<int> refLocalID)
+{
+    std::vector<int> samRefLocalID(4);
+    //get idx in x
+    samRefLocalID[0]  = samPtLocalID[0] + (refLocalID[0] - orgPtLocalID[0]);
+    if (samRefLocalID[0]<0) {
+        samRefLocalID[0] = samRefLocalID[0] + Nx;
+    } else if(samRefLocalID[0] >Nx){
+        samRefLocalID[0] = samRefLocalID[0] - Nx;
+    }
+    
+    //get idx in z
+    samRefLocalID[2]  = samPtLocalID[2] + (refLocalID[2] - orgPtLocalID[2]);
+    if (samRefLocalID[2]<0) {
+        samRefLocalID[2] = samRefLocalID[2] + Nz;
+    } else if(samRefLocalID[2] >Nz){
+        samRefLocalID[2] = samRefLocalID[2] - Nz;
+    }
+    
+    if ( (samRefLocalID[0]<0 || samRefLocalID[0]>Nx )
+         || (samRefLocalID[2]<0 || samRefLocalID[2]>Nz)
+        ) {
+        FatalError << "out of range, local point is not in the proper position" << nl
+        << exit(FatalError);
+    }
+    
+    samRefLocalID[1] = refLocalID[1];
+    samRefLocalID[3] = refLocalID[3];
+    
+    return getGlobalID(samRefLocalID);
+}
 
 void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 {
     bool writeResults = !args.optionFound("noWrite");
     
     Info<<"reading the 6 basic data for analysis."<<endl;
+    
     volVectorField U
     (
         IOobject
@@ -55,7 +153,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
         mesh
     );
 
-/*    volVectorField UMeanMap
+    volVectorField UMeanMap
     (
         IOobject
         (
@@ -121,40 +219,87 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
     );
 
 
-    volVectorField UPrime(U-UMeanMap);
-    volVectorField vorticityPrime(vorticity-vorticityMeanMap);
+    volVectorField Uturb(U-UMeanMap);
+    volVectorField Wturb(vorticity-vorticityMeanMap);
 
-*/
-    forAll(U, cellI)
+
+    
+    Info << "Reading reference points" << endl;
+    IOdictionary refPointsProperties
+    (
+        IOobject
+        (
+            "refPointsProperties",
+            runTime.constant(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+         )
+    );
+    
+    List<vector> refpts = List<vector>(refPointsProperties.lookup("refPoints"));
+    
+    forAll(refpts,ref_idx)
     {
-       
-        Info<<"In cell ID ["<< cellI<<"], cell center is" << mesh.C()[cellI]<<endl;
-   /*  Info<<"Formulating the Uprime field"<<endl;
+        int gID_refpts = refmesh.findCell(refpts[ref_idx]);
+        std::vector<int> localID_refpts=getLocalID(gID_refpts);
+        Info << "Calculate R for the point (" <<refpts[ref_idx]<<"),and it is localted at"
+             << mesh.C()[gID_refpts] << nl;
+             << "it's global ID is " << gID_refpts << " and its local id is i=["
+             << localID_refpts[0] <<"],j=["<< localID_refpts[1]<<"], and k=["
+             << localID_refpts[2]<<"], and blk_ID=["<< localID_refpts[3]<<"]"
+             << endl;
+        
+        volVectorField RUW= new volVectorField(
+                                                    IOobject
+                                                    (
+                                                        "RUW"+name(ref_idx),
+                                                        runTime.timeName(),
+                                                        mesh,
+                                                        IOobject::NO_READ,
+                                                        IOobject::AUTO_WRITE
+                                                    ),
+                                                    mesh,
+                                                    dimensionedVector("zero", dimensionSet(0, 0, 0, 0, 0, 0, 0),, vector::zero)
+                                               );
 
+
+        
+        forAll(mesh,cellI)
+        {
+            std::vector<int> localID_pts=getLocalID(cellI);
+            //loop over layer
+            for (int i=0; i<Nx; i++) {
+                for (int k=0; k<Nz; k++) {
+                        std::vector<int> localID_samPt[4];
+                        localID_samPt[0] = i;
+                        localID_samPt[1] = localID_pts[2];
+                        localID_samPt[2] = k;
+                        localID_samPt[3] = localID_pts[4];
+                        int gID_samPt    = getGlobalID(localID_samPt);
+                        int gID_samRefPt = getsamRefGloablID(localID_samPt,localID_pts,localID_refpts);
+                        RUW.component(vector::X)()[cellI] = RUW.component(vector::X)()[cellI]
+                                                           + Uturb.component(vector::X)()[gID_samRefPt]*Wturb.component(vector::X)()[gID_samPt]/ \
+                                                            (URMS.component(vector::X)()[gID_samRefPt]*WRMS.component(vector::X)()[gID_samPt]);
+                        RUW.component(vector::Y()[cellI] = RUW.component(vector::Y)()[cellI]
+                                                           + Uturb.component(vector::X)()[gID_samRefPt]*Wturb.component(vector::Y)()[gID_samPt]/ \
+                                                             (URMS.component(vector::X)()[gID_samRefPt]*WRMS.component(vector::Y)()[gID_samPt]);
+                        RUW.component(vector::Z()[cellI] = RUW.component(vector::Z)()[cellI]
+                                                           + Uturb.component(vector::X)()[gID_samRefPt]*Wturb.component(vector::Z)()[gID_samPt]/ \
+                                                           (URMS.component(vector::X)()[gID_samRefPt]*WRMS.component(vector::Z)()[gID_samPt]);
+                }
+            }
+            RUW[cellI]=RUW[cellI]/(Nx*Nz);
+            
+        }
+        
         if (writeResults)
         {
-            //RUU11.write();
-            //RUU22.write();
-            //RUU33.write();
-            Info<<"RUU11 is "<<RUU11<<endl;
-            Info<<"RUU22 is "<<RUU22<<endl;
-            Info<<"RUU33 is "<<RUU33<<endl;
-
-            RUW13.write();
-            RUW23.write();
-            RUW33.write();
-
-            RU1Q.write();
-            RU2Q.write();
-            RU3Q.write();
-  
-      }
-        else
-        {
-            Info<< "    No U" << endl;
+            RUW.write();
         }
-    */
+        
     }
+    
     Info<< "\nEnd\n" << endl;
         
 }
