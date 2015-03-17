@@ -45,6 +45,10 @@ Description
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+void Foam::mytest()
+{
+    Info<<"in my test" << endl;
+}
 int getGlobalID(std::vector<int> localID)
 {
     if (localID[3]==0) {
@@ -60,7 +64,7 @@ int getGlobalID(std::vector<int> localID)
         return (Nx*Ny3)*localID[2]+Nx*localID[1]+localID[0]+Nx*(Ny0+Ny1+Ny2)*Nz;
     }
     else{
-        Cout << "out of range, when calculate GlobalID" << endl;
+        cout << "out of range, when calculate GlobalID" << endl;
     }
 }
 
@@ -94,8 +98,7 @@ std::vector<int> getLocalID(int ID)
         localID.push_back(3);
     }
     else{
-        FatalError << "out of range, when calculate LocalID" << nl
-        << exit(FatalError);
+        cout << "out of range, when calculate LocalID" << endl;
     }
     
     return localID;
@@ -123,8 +126,7 @@ int getsamRefGloablID(std::vector<int> samPtLocalID,  std::vector<int> orgPtLoca
     if ( (samRefLocalID[0]<0 || samRefLocalID[0]>Nx )
          || (samRefLocalID[2]<0 || samRefLocalID[2]>Nz)
         ) {
-        Info << "out of range, local point is not in the proper position" << nl
-        << exit(FatalError);
+        cout << "out of range, local point is not in the proper position" << endl;
     }
     
     samRefLocalID[1] = refLocalID[1];
@@ -136,6 +138,8 @@ int getsamRefGloablID(std::vector<int> samPtLocalID,  std::vector<int> orgPtLoca
 void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 {
     bool writeResults = !args.optionFound("noWrite");
+    
+    mytest();
     
     Info<<"reading the 6 basic data for analysis."<<endl;
     
