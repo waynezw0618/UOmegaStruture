@@ -273,11 +273,11 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
             //loop over layer
             for (int i=0; i<Nx; i++) {
                 for (int k=0; k<Nz; k++) {
-                        std::vector<int> localID_samPt(4,0);
-                        localID_samPt[0]=i;
-                        localID_samPt[1]=localID_pts[1];
-                        localID_samPt[2]=k;
-                        localID_samPt[3]=localID_pts[3];
+                        std::vector<int> localID_samPt;
+                        localID_samPt.push_back(i);
+                        localID_samPt.push_back(localID_pts[1]);
+                        localID_samPt.push_back(k);
+                        localID_samPt.push_back(localID_pts[3]);
                     Info << "a"<< endl;
                     Info << "i=" << localID_samPt[0] << ",j="<<localID_samPt[1]<<", k=" <<localID_samPt[2]<<",nBK="<<localID_samPt[3]<<endl;
                         int gID_samPt    = getGlobalID(localID_samPt);
