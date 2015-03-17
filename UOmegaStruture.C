@@ -273,16 +273,16 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
             //loop over layer
             for (int i=0; i<Nx; i++) {
                 for (int k=0; k<Nz; k++) {
-                    Info << " real i=" << i << ", and k =" << k<<endl;
+                    //Info << " real i=" << i << ", and k =" << k<<endl;
                         std::vector<int> localID_samPt;
                         localID_samPt.push_back(i);
                         localID_samPt.push_back(localID_pts[1]);
                         localID_samPt.push_back(k);
                         localID_samPt.push_back(localID_pts[3]);
-                    Info << "a"<< endl;
-                    Info << "i=" << localID_samPt[0] << ",j="<<localID_samPt[1]<<", k=" <<localID_samPt[2]<<",nBK="<<localID_samPt[3]<<endl;
+                    //Info << "a"<< endl;
+                    //Info << "i=" << localID_samPt[0] << ",j="<<localID_samPt[1]<<", k=" <<localID_samPt[2]<<",nBK="<<localID_samPt[3]<<endl;
                         int gID_samPt    = getGlobalID(localID_samPt);
-                    Info << "b global id is " <<  gID_samPt  << endl;
+                    //Info << "b global id is " <<  gID_samPt  << endl;
                         int gID_samRefPt = getsamRefGloablID(localID_samPt,localID_pts,localID_refpts);
                         RUW.component(vector::X)()[cellI] = RUW.component(vector::X)()[cellI]
                                                             + Uturb.component(vector::X)()[gID_samRefPt]*Wturb.component(vector::X)()[gID_samPt];
