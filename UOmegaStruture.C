@@ -61,7 +61,7 @@ int getGlobalID(std::vector<int> localID)
         return (Nx*Ny3)*localID[2]+Nx*localID[1]+localID[0]+Nx*(Ny0+Ny1+Ny2)*Nz;
     }
     else{
-        cout << "out of range, when calculate GlobalID" << std::endl;
+        cout << "out of range, when calculate GlobalID a" << std::endl;
         return -1;
     }
 }
