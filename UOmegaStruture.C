@@ -168,7 +168,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
         mesh
     );
 
-    volSymmTensorField URMSMap
+    volVectorField URMSMap
     (
         IOobject
         (
@@ -207,7 +207,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
         mesh
     );
 
-    volSymmTensorField vorticityRMSMap
+    volVectorField vorticityRMSMap
     (
         IOobject
         (
