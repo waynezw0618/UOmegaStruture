@@ -61,7 +61,10 @@ int getGlobalID(std::vector<int> localID)
         return (Nx*Ny3)*localID[2]+Nx*localID[1]+localID[0]+Nx*(Ny0+Ny1+Ny2)*Nz;
     }
     else{
-        cout << "out of range, when calculate GlobalID a" << std::endl;
+        cout << "out of range, when calculate GlobalID for point i=["
+           << localID[0] <<"],j=["<< localID[1]<<"], and k=["
+           << localID[2]<<"], and blk_ID=["<< localID[3]<<"]"
+           << std::endl;
         return -1;
     }
 }
@@ -96,7 +99,7 @@ std::vector<int> getLocalID(int ID)
         localID.push_back(3);
     }
     else{
-        cout << "out of range, when calculate LocalID" << std::endl;
+        cout << "out of range, when calculate LocalID for global" <<ID << std::endl;
     }
     
     return localID;
