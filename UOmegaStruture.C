@@ -275,9 +275,9 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                 for (int k=0; k<Nz; k++) {
                         std::vector<int> localID_samPt(4,0);
                         localID_samPt.assign(0,i);
-                        localID_samPt.assign(1,localID_pts[2]);
+                        localID_samPt.assign(1,localID_pts[1]);
                         localID_samPt.assign(2,k);
-                        localID_samPt.assign(3,localID_pts[4]);
+                        localID_samPt.assign(3,localID_pts[3]);
                     Info << "a"<< endl;
                     Info << "i=" << i << ",j="<<localID_pts[2]<<", k=" <<k<<",nBK="<<localID_pts[4]<<endl;
                         int gID_samPt    = getGlobalID(localID_samPt);
