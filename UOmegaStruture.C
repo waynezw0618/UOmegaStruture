@@ -35,12 +35,12 @@ Description
 #include "calc.H"
 #include "fvc.H"
 #include <vector>
-#define Nx 40//192
-#define Ny0  25//24
-#define Ny1 25//36
+#define Nx 192
+#define Ny0  24
+#define Ny1 36
 #define Ny2 25
 #define Ny3 8
-#define Nz  30//160
+#define Nz  160
 #define Nblocks 4
 
 
@@ -139,7 +139,7 @@ int getsamRefGloablID(std::vector<int> samPtLocalID,  std::vector<int> orgPtLoca
 void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 {
     bool writeResults = !args.optionFound("noWrite");
-    
+    #include "createTime.H"
     Info<<"reading the 6 basic data for analysis."<<endl;
     
     volVectorField U
@@ -303,6 +303,10 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
         {
             RUW.write();
         }
+        
+        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+        << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+        << nl << endl;
         
     }
     
