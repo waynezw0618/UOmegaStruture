@@ -155,7 +155,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
         mesh
     );
 
-/*    volVectorField UMeanMap
+   volVectorField UMeanMap
     (
         IOobject
         (
@@ -168,17 +168,17 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
         mesh
     );
 
-    volVectorField URMSMap
+   volVectorField Uturb
     (
         IOobject
         (
-            "URMSMap",
+            "Uturb",
             runTime.timeName(),
             mesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         ),
-        mesh
+        U-UMeanMap
     );
 
     volVectorField vorticity
@@ -207,21 +207,21 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
         mesh
     );
 
-    volVectorField vorticityRMSMap
+    volVectorField Wturb
     (
         IOobject
         (
-            "vorticityRMSMap",
+            "Wturb",
             runTime.timeName(),
             mesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         ),
-        mesh
+        vorticity-vorticityMeanMap
     );
 
 
-    volVectorField Uturb(U-UMeanMap);
+/*    volVectorField Uturb(U-UMeanMap);
     volVectorField Wturb(vorticity-vorticityMeanMap);
 
 */
@@ -266,7 +266,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                         );
 
         */
-    forAll(refpts,ref_idx)
+   /* forAll(refpts,ref_idx)
     {
         forAll(U,cellI)
         {
@@ -275,7 +275,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                  << " and it is i=[" << localID_pts[0] <<"],j=["<< localID_pts[1]<<"], and k=["
                  << localID_pts[2]<<"], and blk_ID=["<< localID_pts[3]<<"]"
                  << endl;
-            /*//loop over layer
+            //loop over layer
             for (int i=0; i<Nx; i++) {
                 for (int k=0; k<Nz; k++) {
                     //Info << " real i=" << i << ", and k =" << k<<endl;
@@ -300,16 +300,23 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                                                            //Foam::sqrt(URMSMap.component(tensor::XX)()[gID_samRefPt]*vorticityRMSMap.component(tensor::ZZ)()[gID_samPt]);
                 }
             }
-            RUW[cellI]=RUW[cellI]/(Nx*Nz);*/
+            RUW[cellI]=RUW[cellI]/(Nx*Nz);
             
         }
         
-        /*if (writeResults)
+        if (writeResults)
         {
             RUW.write();
-        }*/
+        }
         
-        
+
+    }*/
+    
+    
+    if (writeResults)
+    {
+        Uturb.write();
+        Wturb.write();
     }
     
     Info<< "\nEnd\n" << endl;
