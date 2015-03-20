@@ -36,7 +36,7 @@ Description
 #include "fvc.H"
 #include <vector>
 #define Nx 192
-#define Ny0  24
+#define Ny0 24
 #define Ny1 36
 #define Ny2 25
 #define Ny3 8
@@ -155,7 +155,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
         mesh
     );
 
-    volVectorField UMeanMap
+/*    volVectorField UMeanMap
     (
         IOobject
         (
@@ -224,7 +224,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
     volVectorField Uturb(U-UMeanMap);
     volVectorField Wturb(vorticity-vorticityMeanMap);
 
-
+*/
     
     Info << "Reading reference points" << endl;
     IOdictionary refPointsProperties
@@ -251,8 +251,8 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
              << localID_refpts[0] <<"],j=["<< localID_refpts[1]<<"], and k=["
              << localID_refpts[2]<<"], and blk_ID=["<< localID_refpts[3]<<"]"
              << endl;
-        
-        volVectorField RUW(
+    }
+        /*volVectorField RUW(
                                 IOobject
                                 (
                                     "RUW"+name(ref_idx),
@@ -265,12 +265,17 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                                 dimensionedVector("zero", dimensionSet(0, 1, -2, 0, 0, 0, 0), vector::zero)
                         );
 
-
-        
+        */
+    forAll(refpts,ref_idx)
+    {
         forAll(U,cellI)
         {
             std::vector<int> localID_pts=getLocalID(cellI);
-            //loop over layer
+            Info << "the " << cellI <<"th cell is at" << mesh.C()[cellI]
+                 << " and it is i=[" << localID_refpts[0] <<"],j=["<< localID_refpts[1]<<"], and k=["
+                 << localID_refpts[2]<<"], and blk_ID=["<< localID_refpts[3]<<"]"
+                 << endl;
+            /*//loop over layer
             for (int i=0; i<Nx; i++) {
                 for (int k=0; k<Nz; k++) {
                     //Info << " real i=" << i << ", and k =" << k<<endl;
@@ -302,7 +307,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
         if (writeResults)
         {
             RUW.write();
-        }
+        }*/
         
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
         << "  ClockTime = " << runTime.elapsedClockTime() << " s"
