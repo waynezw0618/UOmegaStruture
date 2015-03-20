@@ -139,7 +139,7 @@ int getsamRefGloablID(std::vector<int> samPtLocalID,  std::vector<int> orgPtLoca
 void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 {
     bool writeResults = !args.optionFound("noWrite");
-    #include "createTime.H"
+    //#include "createTime.H"
     Info<<"reading the 6 basic data for analysis."<<endl;
     
     volVectorField U
@@ -272,8 +272,8 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
         {
             std::vector<int> localID_pts=getLocalID(cellI);
             Info << "the " << cellI <<"th cell is at" << mesh.C()[cellI]
-                 << " and it is i=[" << localID_refpts[0] <<"],j=["<< localID_refpts[1]<<"], and k=["
-                 << localID_refpts[2]<<"], and blk_ID=["<< localID_refpts[3]<<"]"
+                 << " and it is i=[" << localID_pts[0] <<"],j=["<< localID_pts[1]<<"], and k=["
+                 << localID_pts[2]<<"], and blk_ID=["<< localID_pts[3]<<"]"
                  << endl;
             /*//loop over layer
             for (int i=0; i<Nx; i++) {
@@ -300,18 +300,15 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                                                            //Foam::sqrt(URMSMap.component(tensor::XX)()[gID_samRefPt]*vorticityRMSMap.component(tensor::ZZ)()[gID_samPt]);
                 }
             }
-            RUW[cellI]=RUW[cellI]/(Nx*Nz);
+            RUW[cellI]=RUW[cellI]/(Nx*Nz);*/
             
         }
         
-        if (writeResults)
+        /*if (writeResults)
         {
             RUW.write();
         }*/
         
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-        << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-        << nl << endl;
         
     }
     
